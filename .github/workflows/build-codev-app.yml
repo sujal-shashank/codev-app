@@ -22,7 +22,7 @@ jobs:
           sudo apt install -y \
             zip unzip openjdk-11-jdk zlib1g-dev \
             python3-pip python3-setuptools git \
-            libncurses5 libstdc++6 libffi-dev libssl-dev \
+            libncurses6 libstdc++6 libffi-dev libssl-dev \
             libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
             libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
             libfreetype6-dev libgstreamer1.0-dev \
