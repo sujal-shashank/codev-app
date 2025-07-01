@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📦 Checkout code
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
       - name: 🐍 Set up Python
@@ -16,12 +16,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 🧰 Install Buildozer and system dependencies
+      - name: ☕ Install dependencies (Python + Android)
         run: |
           sudo apt update
-          sudo apt install -y \
-            zip unzip openjdk-11-jdk zlib1g-dev \
-            python3-pip python3-setuptools git \
+          sudo apt install -y zip unzip openjdk-11-jdk ant \
+            zlib1g-dev python3-pip python3-setuptools git \
             libncurses6 libstdc++6 libffi-dev libssl-dev \
             libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
             libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
@@ -29,14 +28,14 @@ jobs:
             gstreamer1.0-libav gstreamer1.0-tools libgstreamer-plugins-base1.0-dev \
             libgstreamer1.0-dev
 
-          python3 -m pip install --upgrade pip setuptools
+          pip install --upgrade pip setuptools
           pip install buildozer cython
 
-      - name: 🏗️ Build APK
+      - name: 🔧 Build the APK
         run: |
           buildozer android debug
 
-      - name: ⬆️ Upload APK artifact
+      - name: ⬆️ Upload generated APK
         uses: actions/upload-artifact@v4
         with:
           name: codev-debug-apk
