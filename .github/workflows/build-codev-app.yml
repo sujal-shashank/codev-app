@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout repository
+      - name: 📦 Checkout code
         uses: actions/checkout@v4
 
       - name: 🐍 Set up Python
@@ -16,33 +16,39 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: ☕ Install dependencies
+      - name: 🧰 Install Buildozer and dependencies
         run: |
           sudo apt update
-          sudo apt install -y zip unzip openjdk-11-jdk ant \
-            zlib1g-dev python3-pip python3-setuptools git \
-            libncurses6 libstdc++6 libffi-dev libssl-dev \
+          sudo apt install -y \
+            zip unzip openjdk-11-jdk zlib1g-dev \
+            python3-pip python3-setuptools git \
+            libncurses5 libstdc++6 libffi-dev libssl-dev \
             libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
             libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
-            libfreetype6-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-            gstreamer1.0-libav gstreamer1.0-tools libgstreamer-plugins-base1.0-dev \
-            libgstreamer1.0-dev
+            libfreetype6-dev libgstreamer1.0-dev \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good
 
-          pip install --upgrade pip setuptools
-          pip install cython buildozer
+          python3 -m pip install --upgrade pip setuptools
+          pip install buildozer cython
 
-      - name: 📦 Accept Android SDK Licenses and Install Build Tools
+      # This is the new step to accept Android SDK licenses
+      - name: ✅ Accept Android SDK licenses
         run: |
-          mkdir -p ~/.android && echo "### User Agreements" > ~/.android/repositories.cfg
-          yes | buildozer android accept_sdk_license
-          sdkmanager --install "build-tools;33.0.2" "platforms;android-33" --sdk_root=$HOME/.buildozer/android/platform/android-sdk
-        env:
-          JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+          # Set Android SDK Root environment variable
+          export ANDROID_SDK_ROOT=${HOME}/.buildozer/android/platform/android-sdk
+          # Create necessary directories if they don't exist
+          mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin
+          # Download command-line tools
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-8583075_latest.zip -O /tmp/commandlinetools.zip
+          unzip -q /tmp/commandlinetools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools/latest
+          # Accept licenses
+          yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
 
-      - name: 🧱 Build the APK
-        run: buildozer android debug
+      - name: 🏗️ Build APK
+        run: |
+          buildozer android debug
 
-      - name: ⬆️ Upload generated APK
+      - name: ⬆️ Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: codev-debug-apk
