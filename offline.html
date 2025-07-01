@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Offline</title></head>
+<body style="text-align:center; padding-top:50px;">
+  <h1>You are offline!</h1>
+  <p>Codev requires an internet connection.</p>
+</body>
+</html>
+<script>
+  // Redirect to the offline page if the user is offline
+  if (!navigator.onLine) {
+    window.location.href = 'offline.html';
+  }
