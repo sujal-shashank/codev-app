@@ -16,17 +16,18 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 🧰 Install Buildozer and dependencies
+      - name: 🧰 Install Buildozer and system dependencies
         run: |
           sudo apt update
           sudo apt install -y \
             zip unzip openjdk-11-jdk zlib1g-dev \
             python3-pip python3-setuptools git \
-            libncurses5 libstdc++6 libffi-dev libssl-dev \
+            libncurses6 libstdc++6 libffi-dev libssl-dev \
             libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
             libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
-            libfreetype6-dev libgstreamer1.0 libgstreamer1.0-dev \
-            gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+            libfreetype6-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+            gstreamer1.0-libav gstreamer1.0-tools libgstreamer-plugins-base1.0-dev \
+            libgstreamer1.0-dev
 
           python3 -m pip install --upgrade pip setuptools
           pip install buildozer cython
