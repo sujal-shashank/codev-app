@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: ☕ Install dependencies (Python + Android)
+      - name: ☕ Install dependencies
         run: |
           sudo apt update
           sudo apt install -y zip unzip openjdk-11-jdk ant \
@@ -29,11 +29,18 @@ jobs:
             libgstreamer1.0-dev
 
           pip install --upgrade pip setuptools
-          pip install buildozer cython
+          pip install cython buildozer
 
-      - name: 🔧 Build the APK
+      - name: 📦 Accept Android SDK Licenses and Install Build Tools
         run: |
-          buildozer android debug
+          mkdir -p ~/.android && echo "### User Agreements" > ~/.android/repositories.cfg
+          yes | buildozer android accept_sdk_license
+          sdkmanager --install "build-tools;33.0.2" "platforms;android-33" --sdk_root=$HOME/.buildozer/android/platform/android-sdk
+        env:
+          JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+
+      - name: 🧱 Build the APK
+        run: buildozer android debug
 
       - name: ⬆️ Upload generated APK
         uses: actions/upload-artifact@v4
