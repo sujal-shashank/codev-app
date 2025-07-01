@@ -31,18 +31,40 @@ jobs:
           python3 -m pip install --upgrade pip setuptools
           pip install buildozer cython
 
-      # This is the new step to accept Android SDK licenses
-      - name: ✅ Accept Android SDK licenses
+      # This step now accepts Android SDK licenses AND explicitly installs build tools
+      - name: ✅ Accept Android SDK licenses and install build tools
         run: |
-          # Set Android SDK Root environment variable
+          # Set Android SDK Root environment variable, where Buildozer will expect it
           export ANDROID_SDK_ROOT=${HOME}/.buildozer/android/platform/android-sdk
-          # Create necessary directories if they don't exist
-          mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin
-          # Download command-line tools
+          # Set JAVA_HOME, which is required for sdkmanager to run
+          export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+
+          # Create the necessary directory structure for command-line tools
+          mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest
+
+          # Download and extract the latest Android command-line tools
+          # These tools contain 'sdkmanager' which is used to manage SDK packages and licenses
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-8583075_latest.zip -O /tmp/commandlinetools.zip
-          unzip -q /tmp/commandlinetools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools/latest
-          # Accept licenses
-          yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
+          unzip -q /tmp/commandlinetools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools/latest/
+
+          # The unzip command might create an extra 'cmdline-tools' directory.
+          # This moves the contents up one level to ensure 'sdkmanager' is directly under 'latest/bin'.
+          if [ -d "${ANDROID_SDK_ROOT}/cmdline-tools/latest/cmdline-tools" ]; then
+            mv ${ANDROID_SDK_ROOT}/cmdline-tools/latest/cmdline-tools/* ${ANDROID_SDK_ROOT}/cmdline-tools/latest/
+            rmdir ${ANDROID_SDK_ROOT}/cmdline-tools/latest/cmdline-tools
+          fi
+
+          # Add the sdkmanager's bin directory to the PATH for this shell session
+          # This allows us to call 'sdkmanager' directly
+          export PATH=$PATH:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin
+
+          # Accept all Android SDK licenses. The 'yes |' pipes 'y' to all prompts.
+          yes | sdkmanager --licenses
+
+          # Explicitly install the required Android SDK Build-Tools (36.0.0 as per your error)
+          # Also install platform-tools and a recent Android platform (e.g., android-34)
+          # These are common dependencies for Buildozer projects.
+          sdkmanager "build-tools;36.0.0" "platform-tools" "platforms;android-34"
 
       - name: 🏗️ Build APK
         run: |
